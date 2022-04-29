@@ -221,7 +221,7 @@ function stepRecordActions(event) {
   recordAudioAction.Parameters.CallId = event.CallDetails.Participants[0].CallId;
   hangupAction.Parameters.CallId = event.CallDetails.Participants[0].CallId;
   
-  const recordAsset = 's3://' + wavFileBucket + '/' + event.CallDetails.Participants[0].From + event.CallDetails.Participants[0].CallId + '-0.wav';
+  const recordAsset = 's3://' + wavFileBucket + '/' + event.CallDetails.Participants[0].CallId + '-0.wav';
   console.log('recordAsset address : ', recordAsset);
   //const caseId = uuid();
   const storeInfo = {
@@ -231,7 +231,7 @@ function stepRecordActions(event) {
         transactionId: event.CallDetails.TransactionId,
         requestRecord: recordAsset,
         requestTranscript: "",
-        callId: event.CallDetails.Participants[0].CallId
+        callId: event.CallDetails.Participants[0].CallId,
         status: "open"
       };
   console.log("putting in Dynamo: " + JSON.stringify(storeInfo));
