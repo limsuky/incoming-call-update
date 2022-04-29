@@ -57,6 +57,32 @@ export class SmaBridgingDemo extends cdk.Stack {
       ],
     });
 
+    // const slackWebhookLambda = new lambda.Function(this, "slackWebhookLambda", {
+    //   code: lambda.Code.fromAsset("src", { exclude: ["**", "!slackWebhook.js"] }),
+    //   handler: "slackWebhook.handler",
+    //   runtime: lambda.Runtime.NODEJS_14_X,
+    //   environment: {
+    //     CALLINFO_TABLE_NAME: callInfoTable.tableName,
+    //     WAVFILE_BUCKET: wavFiles.bucketName,
+    //   },
+    //   role: smaLambdaRole,
+    //   timeout: Duration.seconds(60),
+    // });
+
+    const slackWebhookLambda = new lambda.Function(this, "slackWebhookLambda", {
+      code: lambda.Code.fromAsset("src", {
+        exclude: ["**", "!slackWebhook.js"],
+      }),
+      handler: "slackWebhook.handler",
+      runtime: lambda.Runtime.NODEJS_14_X,
+      environment: {
+        CALLINFO_TABLE_NAME: callInfoTable.tableName,
+        WAVFILE_BUCKET: wavFiles.bucketName,
+      },
+      role: smaLambdaRole,
+      timeout: Duration.seconds(60),
+    });
+
     const inboundSMALambda = new lambda.Function(this, "inboundSMALambda", {
       code: lambda.Code.fromAsset("src", { exclude: ["**", "!inboundSMA.js"] }),
       handler: "inboundSMA.handler",
@@ -216,5 +242,6 @@ export class SmaBridgingDemo extends cdk.Stack {
 
     callInfoTable.grantFullAccess(emulatorSMALambda);
     callInfoTable.grantFullAccess(inboundSMALambda);
+    callInfoTable.grantFullAccess(slackWebhookLambda);
   }
 }
