@@ -17,9 +17,6 @@ exports.handler = async (event, context, callback) => {
       break;
 
     case "ACTION_SUCCESSFUL":
-      // console.log("SUCCESS ACTION");
-      // actions = await actionSuccessful(event);
-      // break;
       console.log('EVENT : ACTION_SUCCESSFUL');
       switch (event.ActionData.Type) {
         case 'SpeakAndGetDigits':
@@ -36,11 +33,10 @@ exports.handler = async (event, context, callback) => {
             actions = stepRecordActions(event);
           } else if (receivedDigits === '3') {
             // actions = await stepRecordActions('others', event);
-            actions = stepTwoActions(event);
+            actions = stepRecordActions(event);
           } else {
             actions = [hangupAction];
           }
-
           break;
       }
       break;
@@ -82,6 +78,12 @@ exports.handler = async (event, context, callback) => {
   callback(null, response);
 };
 
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+/* SMA actions*/
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+
 // New call handler
 async function newCall(event, details) {
   console.log('Setting Step Actions');
@@ -93,113 +95,12 @@ async function newCall(event, details) {
 
   console.log('Setting Step Four Actions');
   speakAndGetDigitsActions.Parameters.SpeechParameters.Text =
-  // '<speak>Hello!  You are calling from <say-as interpret-as="telephone">' +
-  // event.CallDetails.Participants[0].From +
-  // '</say-as>.! <break> For techinical support, press 1. For sales support, press 2. For other inquireis, plress 3</speak>'
-  'For techinical support, press 1. For sales support, press 2. For other inquireis, plress 3';
+  'For techinical support, press 1. For sales support, press 2. For other inquireis, press 3';
   speakAndGetDigitsActions.Parameters.CallId =
   event.CallDetails.Participants[0].CallId;
-  
-//    hangupAction.Parameters.CallId = event.CallDetails.Participants[0].CallId;
+
   return [pauseAction, speakAction, speakAndGetDigitsActions]; //hangupAction];
 }
-// async function newCall(event, details) {
-//   const callInfo = await getCaller(event.CallDetails.Participants[0].From);
-//   if (callInfo === false) {
-//     console.log("Do not know this phone number.  Getting Account ID");
-//     playAudioAndGetDigitsAction.Parameters.MinNumberOfDigits = 5;
-//     playAudioAndGetDigitsAction.Parameters.MaxNumberOfDigits = 5;
-//     playAudioAndGetDigitsAction.Parameters.AudioSource.Key = "greeting.wav";
-//     return [playAudioAndGetDigitsAction];
-//   } else {
-//     console.log("Know this phone number.  Sending Prompt");
-//     playAudioAction.Parameters.AudioSource.Key = "accountId.wav";
-//     playAccountIdAction.Parameters.AudioSource.Key = callInfo.id + ".wav";
-//     playAudioAndGetDigitsAction.Parameters.MinNumberOfDigits = 1;
-//     playAudioAndGetDigitsAction.Parameters.MaxNumberOfDigits = 1;
-//     playAudioAndGetDigitsAction.Parameters.AudioSource.Key = "prompt.wav";
-//     return [playAudioAction, playAccountIdAction, playAudioAndGetDigitsAction];
-//   }
-// }
-
-
-async function actionSuccessful(event) {
-  console.log("ACTION_SUCCESSFUL");
-  //const callInfo = await getCaller(event.CallDetails.Participants[0].From);
-
-  //console.log({ callInfo });
-  switch (event.ActionData.Type) {
-    case 'SpeakAndGetDigits':
-      console.log('SpeakAndGetDigits Success');
-      var receivedDigits = event.ActionData.ReceivedDigits;
-      console.log(`Received Digits: ${receivedDigits}`);
-      if (receivedDigits === '1') {
-        actions = stepRecordActions(event);
-        //actions = stepOneActions(event);
-      } else if (receivedDigits === '2') {
-        actions = stepRecordActions(event);
-        //actions = stepTwoActions(event);
-      } else if (receivedDigits === '3') {
-        actions = stepTwoActions(event);
-        //actions = stepThreeActions(event);
-      } else {
-        actions = [hangupAction];
-      }
-
-      break;
-    }  
-    // default:
-    //   return [];
-  }
-  // switch (event.ActionData.Type) {
-  //   case "PlayAudioAndGetDigits":
-  //     const callInfo = await getCaller(event.CallDetails.Participants[0].From);
-
-  //     console.log({ callInfo });
-  //     console.log("ReceivedDigits: " + event.ActionData.ReceivedDigits);
-
-  //     if (callInfo.accountId) {
-  //       if (event.ActionData.ReceivedDigits === "1") {
-  //         console.log("Transfering to Sales");
-  //         playAudioAction.Parameters.AudioSource.Key = "transfer-to-sales.wav";
-  //         callAndBridgeAction.Parameters.CallerIdNumber =
-  //           event.CallDetails.Participants[0].From;
-  //         callAndBridgeAction.Parameters.Endpoints[0].Uri = salesNumber;
-  //         callInfo.extension = "sales";
-  //         await updateCaller(callInfo);
-  //         return [playAudioAction, callAndBridgeAction];
-  //       } else {
-  //         console.log("Transfering to Support");
-  //         playAudioAction.Parameters.AudioSource.Key =
-  //           "transfer-to-support.wav";
-  //         callAndBridgeAction.Parameters.CallerIdNumber =
-  //           event.CallDetails.Participants[0].From;
-  //         callAndBridgeAction.Parameters.Endpoints[0].Uri = supportNumber;
-  //         callInfo.extension = "support";
-  //         await updateCaller(callInfo);
-  //         return [playAudioAction, callAndBridgeAction];
-  //       }
-  //     } else {
-  //       const storeInfo = {
-  //         phoneNumber: event.CallDetails.Participants[0].From,
-  //         accountId: event.ActionData.ReceivedDigits,
-  //         id: event.CallDetails.TransactionId,
-  //       };
-
-  //       console.log("putting in Dynamo: " + JSON.stringify(storeInfo));
-  //       putCaller(storeInfo);
-  //       playAudioAndGetDigitsAction.Parameters.MaxNumberOfDigits = 1;
-  //       playAudioAndGetDigitsAction.Parameters.MinNumberOfDigits = 1;
-  //       playAudioAndGetDigitsAction.Parameters.AudioSource.Key = "prompt.wav";
-  //       console.log("Stored accountId.  Sending Prompt");
-  //       return [playAudioAndGetDigitsAction];
-  //     }
-
-  //   default:
-  //     return [];
-  // }
-//}
-
 
 function stepTwoActions(event) {
   console.log('Setting Step Two Actions');
@@ -215,40 +116,40 @@ function stepTwoActions(event) {
 function stepRecordActions(event) {
   console.log('Setting Step Record Actions');
   console.log('stepRecordActions event : ', event);
+
   speakAction.Parameters.Text =
-    '<speak>Please leave a message. <break time="1s"/> Press # to end. <break time="1s"/> After leave your message, We will contact you soon. </speak>';
+    '<speak>Please leave a message. After leave your message, We will contact you soon. <break time="1s"/> Press # to end.</speak>';
+  
+  const caseId = createCaseId();
+  console.log('caseId : ', caseId);
+
   recordAudioAction.Parameters.RecordingDestination.BucketName = wavFileBucket;
+  recordAudioAction.Parameters.RecordingDestination.Prefix = caseId;
   recordAudioAction.Parameters.CallId = event.CallDetails.Participants[0].CallId;
   hangupAction.Parameters.CallId = event.CallDetails.Participants[0].CallId;
   
-  const recordAsset = 's3://' + wavFileBucket + '/' + event.CallDetails.Participants[0].CallId + '-0.wav';
+  const recordAsset = 's3://' + wavFileBucket + '/' + caseId + '/' + event.CallDetails.Participants[0].CallId + '-0.wav';
   console.log('recordAsset address : ', recordAsset);
-  //const caseId = uuid();
+  
   const storeInfo = {
         phoneNumber: event.CallDetails.Participants[0].From,
-        //caseId: caseId,
+        caseId: caseId,
         category: event.ActionData.ReceivedDigits,
         transactionId: event.CallDetails.TransactionId,
         requestRecord: recordAsset,
-        requestTranscript: "",
+        requestTranscript: "to be updated",
         callId: event.CallDetails.Participants[0].CallId,
-        status: "open"
+        caseStatus: "open"
       };
   console.log("putting in Dynamo: " + JSON.stringify(storeInfo));
   putCaller(storeInfo);
-      // phoneNumber: callInfo.phoneNumber,
-      // caseId: callInfo.caseId,
-      // category : callInfo.category,
-      // transactionId: callInfo.transactionId,
-      // requestRecord: callInfo.record,
-      // requestTranscript: callInfo.transcript,
-      // status: callInfo.status
-  //hangupAction.Parameters.CallId = event.CallDetails.Participants[0].CallId;
-  //return [speakAction, recordAudioAction];//, hangupAction];
   return [speakAction, recordAudioAction, hangupAction];
 }
-
-
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+/* SMA const action objects*/
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
 const hangupAction = {
   Type: "Hangup",
   Parameters: {
@@ -303,7 +204,6 @@ const playAudioAndGetDigitsAction = {
   },
 };
 
-
 const recordAudioAction = {
   // https://docs.aws.amazon.com/chime/latest/dg/record-audio.html
   Type: 'RecordAudio',
@@ -317,11 +217,10 @@ const recordAudioAction = {
     RecordingDestination: {
       Type: 'S3', //required - Allowed values – S3
       BucketName: '', //required - Allowed values – A valid S3 bucket for which Amazon Chime has access to the s3:GetObject action
-      // Prefix: '', //optional - Allowed values – A valid prefix name
+      Prefix: '', //optional - Allowed values – A valid prefix name
     },
   },
 };
-
 
 const speakAndGetDigitsActions = {
   // https://docs.aws.amazon.com/chime/latest/dg/speak-and-get-digits.html
@@ -402,18 +301,23 @@ const pauseAction = {
   },
 };
 
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+/* Dynamo DB actions*/
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
 async function putCaller(callInfo) {
   var params = {
     TableName: callInfoTable,
     Item: {
       phoneNumber: callInfo.phoneNumber,
-      //caseId: callInfo.caseId,
+      caseId: callInfo.caseId,
       category : callInfo.category,
       transactionId: callInfo.transactionId,
-      requestRecord: callInfo.record,
-      requestTranscript: callInfo.transcript,
+      requestRecord: callInfo.requestRecord,
+      requestTranscript: callInfo.requestTranscript,
       callId: callInfo.callId,
-      status: callInfo.status
+      caseStatus: callInfo.caseStatus
     },
   };
 
@@ -426,25 +330,6 @@ async function putCaller(callInfo) {
     return err;
   }
 }
-// async function putCaller(callInfo) {
-//   var params = {
-//     TableName: callInfoTable,
-//     Item: {
-//       phoneNumber: callInfo.phoneNumber,
-//       accountId: callInfo.accountId,
-//       id: callInfo.id,
-//     },
-//   };
-
-//   try {
-//     const results = await documentClient.put(params).promise();
-//     console.log(results);
-//     return results;
-//   } catch (err) {
-//     console.log(err);
-//     return err;
-//   }
-// }
 
 async function updateCaller(callInfo) {
   var params = {
@@ -485,13 +370,13 @@ async function getCaller(callInfo) {
         // id: results.Item.id,
         
         phoneNumber: callInfo.phoneNumber,
-        //caseId: callInfo.caseId,
+        caseId: callInfo.caseId,
         category : callInfo.category,
         transactionId: callInfo.transactionId,
-        requestRecord: callInfo.record,
-        requestTranscript: callInfo.transcript,
+        requestRecord: callInfo.requestRecord,
+        requestTranscript: callInfo.requestTranscript,
         callId: callInfo.callId,
-        status: callInfo.status
+        caseStatus: callInfo.caseStatus
       };
       console.log({ callInfo });
       return callInfo;
@@ -504,4 +389,19 @@ async function getCaller(callInfo) {
     console.log("No phone found");
     return false;
   }
+}
+
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+/* UTILS : case uuid */
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+
+const createCaseId = () => {
+  console.log("in createCaseId")
+  let str = ''
+  for (let i = 0; i < 6; i++) {
+    str += Math.floor(Math.random() * 10)
+  }
+  return str;
 }
