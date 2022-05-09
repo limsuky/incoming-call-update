@@ -1,10 +1,12 @@
-# Bridging Call with Amazon Chime SIP Media Applications
+# Notifying slack for incoming voice message with Amazon Chime SIP Media Applications
 
-This demo will build and configure several services within AWS so that you can bridge a call from one Amazon Chime SIP media application to another to emulate an IVR.
+This demo will build and configure several services within AWS so that you can leave a call voice message from one Amazon Chime SIP media application to slack.
+Voice message transcripted with Transcribe, and notified to slack webhook.
+
 
 ## Overview
 
-![Diagram](images/BridgingDiagram.png)
+![Diagram](images/ArchitectureDiagram.png)
 
 ## Requirements
 
@@ -16,15 +18,17 @@ This demo will build and configure several services within AWS so that you can b
 
 ## Deployment
 
-- Clone this repo: `git clone https://github.com/aws-samples/amazon-chime-sma-bridging`
-- `cd amazon-chime-sma-bridging`
+- Clone this repo: `git clone https://github.com/limsuky/incoming-call-update`
+- `cd incoming-call-update`
 - `./deploy.sh`
 
 ## Resources Created
 
 - Three Lambda Functions
   - inboundSMA Lambda: Used to process inbound calls with Chime SMA
-  - emultatorSMA Lambda: Used to emulate a PBX or IVR and take incoming calls from the inboundSMA Lambda
+  - createTranscription Lambda: Used to create transcription from SMA recording in S3 bucket. 
+  - slackWebWook Lambda : Used to send slack webhook message that contains voice memo and caller information.
+  - slackEvent Lambda : Used to integrate with Slack command and DynamoDB do get cases and change case status.
   - createWav Lambda: Used to create wav files from Polly and store in S3 for SMA lambdas to use as audio source
 - Three Chime SIP Media application rules
   - inbound SMA rule with phone number
@@ -36,13 +40,14 @@ This demo will build and configure several services within AWS so that you can b
 - One DynamoDB used to store information when passing between SIP media applications
 - One S3 Bucket used to store wav files for play on SIP media applications
 
+
 ## Operation
 
-In this demo, you will be creating two Chime SIP media applications. The first SMA, `inboundSMA.js` is created and assocaited with a phone number `inboundPhoneNumber` that is part of the CDK output. The second SMA, `emulatorSMA.sj` is created and associated with two phone numbers: `salesPhoneNumber` and `supportPhoneNumber`. The Emulator SMA will act as a simple telephony device that answers the inbound call and plays a message.
+In this demo, you will be creating a Chime SIP media application. The SMA, `inboundSMA.js` is created and assocaited with a phone number `inboundPhoneNumber` that is part of the CDK output. The `inboundSMA` Lmabda also create audio record file that caller left voice message. With given information getting from IVR actions, the data will be stored in to Dynamo DB.
+The S3 event (record file created) triggers `createTranscription.py` to create transcription using Amazon Transcribe service. When `Job Completed` event from event bridge will sent a event to `slackEvent.js` Lambda to assemble all caller data and synchronise with Dynamo DB, and send webWook message to slack.
+In addition, `slackEvent.js` interacts with slack commands such as `/openedcase`, `/closedcase` to query current case status, and `/makeclose` and `/reopen` command to make change case status that integrate with case management system (Dynamo DB in this demo).
 
-To test this out, from a normal phone, place a call to the `inboundPhoneNumber`. The `inboundSMA` will first check to see if the calling number has an assocaited account ID. If it does, it plays a message and requests a DTMF response of '1' for sales or '2' for support. Once a selection has been made, this SMA will bridge the call to the associated number on the the `emulatorSMA`. If the number is not assocaited with an account, the SMA will request the account ID and store that account ID in a DynamoDB. This store will trigger a Lambda to create a wav file for later playback.
-
-When the call arrives on the `emulatorSMA`, it will look up the number on the incoming call and get the associated account ID. It will then play the account number back to the caller and hangup.
+To test this out, from a normal phone, place a call to the `inboundPhoneNumber`. The `inboundSMA` will first check to see if the calling number has an assocaited account ID. If it does, it plays a message and requests a DTMF response of '1' for technical or '2' for sales or '3' for other inqueries. Once a selection has been made, this SMA will request leave a message and record the voice message. 
 
 ## Cleanup
 
