@@ -14,9 +14,9 @@ import * as sqs from "@aws-cdk/aws-sqs";
 import events = require("@aws-cdk/aws-events");
 import * as targets from '@aws-cdk/aws-events-targets';
 import apigateway = require('@aws-cdk/aws-apigateway'); 
-import slackConfig from './../utils/slack_env_variables';
+import slackConfig from '../utils/slack_env_variables';
 
-export class SmaBridgingDemo extends cdk.Stack {
+export class SmaSlackIntegDemo extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
@@ -200,9 +200,11 @@ export class SmaBridgingDemo extends cdk.Stack {
       },
     });
     
+    processTranscribeRule.addtarget(new targets.LambdaFunction(slackWebhookLambda));
     //processTranscribeRule.addTarget(new targets.LambdaFunction(slackWebhookLambda))
-    processTranscribeRule.addTarget(new targets.LambdaFunction(slackWebhookLambda));
-
+    //slackWebhookLambda.addTarget(new targets.LambdaFunction(processTranscribeRule));
+    //slackWebhookLambda.addEventSource.bind(processTranscribeRule);
+    //slackWebhookLambda.addEventSource(processTranscribeRule);
    
     ////////////////////////////////////////////////////////////////
     /* Slack Evemt handling */

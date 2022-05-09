@@ -111,7 +111,7 @@ exports.handler =  async (event, context, callback) => {
   //////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////
   
-  webhookMessagePayload.blocks[0].text.text = 'translate test';
+  webhookMessagePayload.blocks[0].text.text = '*New Case Opened*';
   webhookMessagePayload.blocks[1].fields[0].text = "Case Id : "  + scannedRsult.Items[0].caseId;
   webhookMessagePayload.blocks[2].fields[0].text = "Phone Number : " + scannedRsult.Items[0].phoneNumber;
   webhookMessagePayload.blocks[3].fields[0].text =  "Catetory : " + scannedRsult.Items[0].category;
@@ -121,9 +121,9 @@ exports.handler =  async (event, context, callback) => {
   const options = {
     hostname: "hooks.slack.com",
     method: "POST",
-    path: "/services/T03CCRCU5B8/B03DPQC8FSP/n8nklFs2takaWcVJVxVgnpnr",
+    path: "/services/T03CCRCU5B8/B03EMVA39SQ/27XqqfXOnW38VQp18Gq13xpx",
   };
-  
+
   const webhookMessagePayloadVar = JSON.stringify(webhookMessagePayload) 
     
   console.log('webhookMessagePayloadVar : ', webhookMessagePayloadVar)
@@ -200,31 +200,31 @@ const webhookMessagePayload = {
         }
       ]
     },
-    {
-      "type": "actions",
-      "elements": [
-        {
-          "type": "button",
-          "text": {
-            "type": "plain_text",
-            "emoji": true,
-            "text": "Approve"
-          },
-          "style": "primary",
-          "value": "click_me_123"
-        },
-        {
-          "type": "button",
-          "text": {
-            "type": "plain_text",
-            "emoji": true,
-            "text": "Reject"
-          },
-          "style": "danger",
-          "value": "click_me_123"
-        }
-      ]
-    }
+    // {
+    //   "type": "actions",
+    //   "elements": [
+    //     {
+    //       "type": "button",
+    //       "text": {
+    //         "type": "plain_text",
+    //         "emoji": true,
+    //         "text": "Approve"
+    //       },
+    //       "style": "primary",
+    //       "value": "click_me_123"
+    //     },
+    //     {
+    //       "type": "button",
+    //       "text": {
+    //         "type": "plain_text",
+    //         "emoji": true,
+    //         "text": "Reject"
+    //       },
+    //       "style": "danger",
+    //       "value": "click_me_123"
+    //     }
+    //   ]
+    // }
   ]
 };
 
