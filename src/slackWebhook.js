@@ -32,42 +32,10 @@ exports.handler =  async (event, context, callback) => {
     
   };
   console.log("TranscriptionJob Params : ", params)
-  
-  
+   
   //////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////
-  /* Building Live Transcription result */
-  //payload : [1]caseId, [2]phoneNumber, [3]category, [4]requestTranscript, [5]caseStatus
-  //////////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////
-  
-  // transcribeservice.getTranscriptionJob(params, function(err, data) {
-  //   if (err) console.log(err, err.stack); // an error occurred
-  //   else {
-  //     console.log('success : ', data);           // successful response
-  //     console.log("Retrieved transcript : ", data.TranscriptionJob.TranscriptionJobName)
-  //     //downloadFile(data.TranscriptionJob.TranscriptionJobName + '.json')
-  //     //data.Transcript.TranscriptFileUri
-  //     var TranscriptUri = data.TranscriptionJob.Media.MediaFileUri;
-  //     console.log("BEFORE Transformed TrascriptUri : ", TranscriptUri);
-  //     TranscriptUri.replace('wav', 'json');
-  //     console.log("Transformed TrascriptUri : ", TranscriptUri);
-  //     getTranscript(data.TranscriptionJob.Transcript.TranscriptFileUri).then(
-  //         function(getTranscriptResponse) {
-  //         console.log("Retrieved transcript:", getTranscriptResponse);
-  //         //return writeTranscriptToS3(getTranscriptResponse,transcriptFileName);
-  //         //await sendSlackMessage(getTranscriptResponse)
-  //       }).catch(function(err) {
-  //           console.error("Failed to process slackWebHook", err);
-  //           callback(err, null);
-  //       })
-      
-  //   } 
-  // });
-    
-  //////////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////
-  /* Query DDB */
+  /* Scan DDB */
     //////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////
   
@@ -94,8 +62,7 @@ exports.handler =  async (event, context, callback) => {
 
   const transcript = await getTranscriptFromS3(s3Params);
   console.log('transcript from event body : ', transcript);
-  updateCaller(transcript)
-
+  
   //////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////
   /* Update Transcription result to DDB */
@@ -103,6 +70,7 @@ exports.handler =  async (event, context, callback) => {
   //////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////
 
+  updateCaller(transcript);
 
   //////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////
@@ -128,15 +96,19 @@ exports.handler =  async (event, context, callback) => {
     
   console.log('webhookMessagePayloadVar : ', webhookMessagePayloadVar)
   
+  
   //https://hooks.slack.com/services/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
-  const req = https.request(options,
-      (res) => res.on("data", () => callback(null, "OK")))
-  req.on("error", (error) => callback(JSON.stringify(error)));
-  req.write(webhookMessagePayloadVar);
-  req.end();
+  // const req = await https.request(options,
+  //     (res) => res.on("data", () => callback(null, "OK")))
+  // req.on("error", (error) => callback(JSON.stringify(error)));
+  // req.write(webhookMessagePayloadVar);
+  // req.end();
+  //console.log(req)
 
-
+  let result = await postToSlack(options, webhookMessagePayload);
+  //console.log('result : ', result);
 }
+
 
 
 //payload : [0]caseId, [2]phoneNumber, [2]category, [3]requestTranscript, [4]caseStatus
@@ -226,6 +198,37 @@ const webhookMessagePayload = {
     //   ]
     // }
   ]
+};
+
+
+
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+/* Slack webhook message action */
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+// https://github.com/aws-samples/building-bots-on-aws/blob/master/src/handlers/slack-bot.js
+const postToSlack = async (options, payload) => {
+  return new Promise((resolve, reject) => {
+    const req = https.request(options, (res) => {
+        console.log(`statusCode: ${res.statusCode}`);
+        res.on('data', (d) => {
+          process.stdout.write(d);
+      });
+        console.log ('res : ', res.statusMessage)
+        resolve(res);
+    });
+    
+    // If error
+    req.on('error', (e) => {
+        console.error('Error: ', e);
+        reject(res);
+    });
+
+    // Send the request
+    req.write(JSON.stringify(payload));
+    req.end();
+  });
 };
 
 //////////////////////////////////////////////////////////////
