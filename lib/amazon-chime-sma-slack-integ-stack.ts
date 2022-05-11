@@ -200,7 +200,7 @@ export class SmaSlackIntegDemo extends cdk.Stack {
       },
     });
     
-    processTranscribeRule.addtarget(new targets.LambdaFunction(slackWebhookLambda));
+    //processTranscribeRule.addtarget(new targets.LambdaFunction(slackWebhookLambda));
     //processTranscribeRule.addTarget(new targets.LambdaFunction(slackWebhookLambda))
     //slackWebhookLambda.addTarget(new targets.LambdaFunction(processTranscribeRule));
     //slackWebhookLambda.addEventSource.bind(processTranscribeRule);
